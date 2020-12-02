@@ -25,6 +25,7 @@ class Loader(cmd.Cmd):
             if check_response(response):
                 self.er.close()
             else:
+                self.er.close()
                 raise Exception("ACK not reveived")
 
         except serial.SerialException as e:
@@ -44,6 +45,7 @@ class Loader(cmd.Cmd):
 
     
     def do_close(self, line):
+        """Close the tool"""
         sys.exit(1)
 
 
