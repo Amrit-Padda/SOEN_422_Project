@@ -8,4 +8,4 @@
 
 #include <stdio.h>    /* for only: putchar, getchar, fflush, stdin */
 
-//void Console_Putchar(char c) { putchar(c); }
+void Console_Putchar(char c) { putchar(c); }
