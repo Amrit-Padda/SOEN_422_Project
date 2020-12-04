@@ -38,14 +38,14 @@ void sendStatus(u8 status){
 }
 void Download(u8 a, u8 b, u8 c, u8 d){
     int size = d + (c << 8) + (b << 16) + (a << 24);
-    memory = (u8*)realloc(memory, size);
+    memory = (u8*)realloc(memory, size);        //todo: consider, is a larger than "needed" memory size detrimental? maybe use static memory size?
 }
 void run(){
     VM_Init(memory);
     VM_execute(memory);
 }
 void reset(){
-    memory = realloc(memory, 0);
+    memory = realloc(memory, 0);        //todo: consider, is simply zeroing or voiding all the elements in the memory not enough?
     memLen = 0;
 }
 
@@ -82,24 +82,24 @@ char * loadPacket(u8 * packet){
 void LoaderLoop(){
     while(true) {
         u8 *packet = (u8 *) realloc(packet, 3);
-        packet = loadPacket(packet);
+        packet = loadPacket(packet);                //todo test the packet loader (receive a packet, and then echo it back, so that format can be asserted)
         u8 command = packet[2];
         switch (command) {
-            case 0x20://Ping
+            case 0x20://Ping                        //todo test ping
                 break;
-            case 0x23://GetStatus
+            case 0x23://GetStatus                   //todo test GetStatus
                 sendStatus(status);
                 break;
-            case 0x21://Download
-                Download(packet[3], packet[4], packet[5], packet[6]);
+            case 0x21://Download                    //todo test Download
+                Download(packet[3], packet[4], packet[5], packet[6]);//todo change Download to take the packet or an int as an argument, not indecies that's retarded
                 break;
-            case 0x24://SendData
+            case 0x24://SendData                    //todo test SendData
                 receiveData(packet);
                 break;
-            case 0x22://Run
+            case 0x22://Run                         //todo test Run
                 run();
                 break;
-            case 0x25://reset
+            case 0x25://reset                       // todo test reset
                 reset();
                 break;
         }
@@ -115,6 +115,7 @@ int main(void){
         VMOut_PutC(x);
         VMOut_PutC('\n');
     }
+    //todo test loaderloop
     LoaderLoop();
 
     return 0;

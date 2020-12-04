@@ -294,7 +294,7 @@ void VM_execute(u8* startAddr) {
             case TRAP: {
                 u8 op = *(ip+1);
                 switch( op ) {
-#ifdef InterruptManagerOn
+#ifdef InterruptManagerOn   //todo Implement Interrupt manager
                     // Interrupt Manager
                     case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x05:
                         InterruptManager(op);
