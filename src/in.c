@@ -21,4 +21,5 @@ void VMIn_Init(void){
 char VMIn_GetC() {
     while(!(UCSR0A & (1 << RXC0)));
     char input = UDR0;
+    return input;
 };
