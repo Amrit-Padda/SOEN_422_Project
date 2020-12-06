@@ -5,6 +5,8 @@
 */
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
@@ -63,8 +65,7 @@ public class SerialComPort {
     static SerialPort _serialPort;
 
     static byte[] buffer = new byte[12];
-
-#if LoadFromFile
+    
     // Get the executable code into a formatted byte buffer ready to send with checksum.
     // Example: If a file.exe has a length    of 8  bytes [size(2)          + pgm(6)          ]
     //          then it needs a buffer length of 10 bytes [size|cksm|cmd(3) + pgm(6) + zero(1)] 
@@ -75,13 +76,16 @@ public class SerialComPort {
         var fileLength  = (int)fs.Length;
         var filePgmSize = fileLength - 2; 
         var bufferLength = 3 + filePgmSize + 1; // [size|cksm|cmd(3) + pgm(6) + zero(1)]
-        var buffer = new byte[bufferLength];
+        var buffer = new byte[filePgmSize];
 
         // Read the first two bytes to skip the size of the executable.
         fs.Read(buffer, 0, 2);
 
         // Get only the executable code in the buffer starting at index 3.
-        fs.Read(buffer, 3, filePgmSize);
+        fs.Read(buffer, 0, filePgmSize);
+
+        return buffer;
+        
         buffer[0] = (byte)bufferLength;
         buffer[2] = (byte)Cmd.SendData;
 
@@ -93,40 +97,71 @@ public class SerialComPort {
         buffer[1] = checksum;
         return buffer;
     }
+
+    static void transmitCode(byte[] codeBuffer)
+    {
+        
+        
+        for (int i = 0; i < codeBuffer.Length; i += 8)//handle the next 8 bytes of code
+        {
+            List<byte> packetList = new List<byte>();
+            
+            byte checksum = 0;
+            for (int j = i; j < (i + 8) && j < codeBuffer.Length; j++)
+            {
+                checksum += codeBuffer[j];
+                packetList.Add(codeBuffer[j]);
+                
+            }
+            packetList.Add(0);
+            packetList.Insert(0,(byte)Cmd.SendData);
+            checksum += (byte) Cmd.SendData;
+            packetList.Insert(0,checksum);
+            packetList.Insert(0,(byte)(packetList.Count));
+            byte[] packetArray = packetList.ToArray();
+            
+            
+            Console.Write("\nSending Packet = [");
+            for (int x = 0; x < packetArray.Length; x++)
+            {
+                Console.Write(" <"+packetArray[x]+">");
+            }
+            Console.Write(" ]\n");
+            
+            _serialPort.Write(packetArray, 0, packetArray.Length);
+            
+            Thread.Sleep(2300);//give the target time to handle the packet before sending the next.
+        }
+    }
     
     // Main thread to transmit packets to target (reading .exe files).
-    public static void Main(string[] args) {
+    public static void Main(string[] args)
+    {
+        string exeFilename;
         if (args.Length != 1) {
-            Console.WriteLine("Usage: HostSerialLoader.exe <file.exe>");
-            return;
+            //Console.WriteLine("Usage: HostSerialLoader.exe <file.exe>");
+
+            exeFilename = "C:/Users/Roman/Documents/School/TERM-8/Soen422/project test files/T01.exe";
+
         }
-        string exeFilename = args[0];
+        else
+        {
+            exeFilename = args[0];
+        }
+        
 //t        Console.WriteLine("file = {0}", exeFilename);
 
         // Get the executable code in a buffer to build packet(s).
         var buf = GetCode(exeFilename);
+        
 
         byte[] sendDataPacketFile = new byte[buf.Length];
 
         for (int n = 0; n < buf.Length; ++n) {
-//t            Console.Write("{0:X2} ", buf[n]);
             sendDataPacketFile[n] = buf[n];
         }
 
-//t        Console.WriteLine("\nsendDataPacket.Length = {0}.", sendDataPacketFile.Length);
-//t        Console.WriteLine("\nbuf.Length = {0}.", buf.Length);
-//t        Console.WriteLine("\nfile = {0} loaded.", exeFilename);
-#else
-    // Main thread to transmit packets to target (with hardcoded packets).
-
-
-    public static void Main2()
-    {
-        Console.Write(sendDataPacket.Length+"  "+sendDataPacket2.Length);
-    }
-
-    public static void Main() {
-#endif
+    
         StringComparer stringComparer = StringComparer.OrdinalIgnoreCase;
         Thread readThread = new Thread(ReadByte);
         // Create a new SerialPort with the same Arduino Nano settings.
@@ -157,24 +192,20 @@ public class SerialComPort {
         // Send cmd to target using a command prompt (for debugging purpose).
         
         while (_continue) {
-            Console.WriteLine("Usage: type 'p'(ping), 'd'(download), 'r'(run), and 'q' to quit.");
+            Console.WriteLine("Usage: type 'ping'(ping), 'status', 'd'(download), 'run', 'reset', and 'quit'");
             Console.Write("$ ");
             cmd = Console.ReadLine();
 
-            if (stringComparer.Equals("q", cmd)) {
+            if (stringComparer.Equals("quit", cmd)) {
                 _continue = false;
-            } else if (stringComparer.Equals("p", cmd)) { // ping
+            } else if (stringComparer.Equals("ping", cmd)) { // ping
                 Console.WriteLine("sending ping");
                 _serialPort.Write(pingPacket, 0, 4);
-            } else if (stringComparer.Equals("s", cmd)) { // getStatus
+            } else if (stringComparer.Equals("status", cmd)) { // getStatus
                 _serialPort.Write(getStatusPacket, 0, 4);
             } else if (stringComparer.Equals("d", cmd)) { // download (sendData - small pgm)
-#if LoadFromFile
-                _serialPort.Write(sendDataPacketFile, 0, sendDataPacketFile.Length);
-#else
-                _serialPort.Write(sendDataPacket, 0, sendDataPacket.Length);
-#endif
-            } else if (stringComparer.Equals("r", cmd)) { // run
+                transmitCode(buf);
+            } else if (stringComparer.Equals("run", cmd)) { // run
                 _serialPort.Write(runPacket, 0, 4);
                 _run = true;
             } else {

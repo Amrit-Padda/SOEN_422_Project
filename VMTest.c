@@ -43,11 +43,10 @@ void Download(u8 a, u8 b, u8 c, u8 d){
 }
 void run(){
 
-    //VMOut_PutS("Run=\n[");
+    VMOut_PutS("\n\nRun=\n[");
     VM_Init(memory);
     VM_execute(memory);
-    //VMOut_PutC(']');
-    //VMOut_PutC('\n');
+    VMOut_PutS('\n]\n\n');
 }
 void reset(){
     memory = realloc(memory, 0);        //todo: consider, is simply zeroing or voiding all the elements in the memory not enough?
@@ -79,7 +78,7 @@ char * loadPacket(u8 * packet){
                 checksum += packet[i];
             }
         }
-        //VMOut_PutS("packet Received");
+        //VMOut_PutS("packet Received = [");VMOut_PutS(packet);VMOut_PutC(']');
         if ((u8)checksum == packet[1]) {
             //VMOut_PutS("sending Ack");
             sendAck();
