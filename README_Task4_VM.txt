@@ -8,4 +8,4 @@ To run the test for task 4 follow these steps:
 
 4 - Open a serial monitor of your choice connected to COM3, if none is available, you may run the Loader provided for task 5 (Program.cs in the Loader folder)
 
-5 - if no results aprear on the serial monitor or loader, hit the reset button on the arduino to re-run the code. The results should appear.
+5 - if no results appear on the serial monitor or loader, hit the reset button on the arduino to re-run the code. The results should appear.
