@@ -1,14 +1,11 @@
 //
 // Created by Roman on 25/11/2020.
 //
-#include <stdio.h>  /* for FILE   */
-#include <string.h> /* for strtok */
 #include <stdlib.h>
 
 #include "src/hal.h"
 #include "src/out.h"
 #include "src/vm.h"
-#include "src/_stdtype.h"
 #include "src/in.h"
 
 #define CommandReturn_Success 0x40
@@ -130,7 +127,7 @@ int main(void){
 
     //memory[0] =0x91; memory[1] = 0xFF; memory[2]= 0x82; memory[3] = 0xFF; memory[4] = 0x87; memory[5] = 0x00;
 
-    //todo test loaderloop
+
     LoaderLoop();
 
     return 0;

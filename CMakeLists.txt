@@ -26,4 +26,4 @@ add_executable(MainPort
         src/vmstack.c
         src/vmstack.h
         tout.c
-        src/BSL.h test_cout.c VMTest.c src/in.h src/in.c)
+        src/BSL.h test_cout.c VMTest.c src/in.h src/in.c Task4.c)
