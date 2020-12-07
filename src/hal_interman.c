@@ -21,8 +21,13 @@ void hal_Interrupt_Enable(void){
 }
 u16 hal_Interrupt_SaveAndDisable(void){
 
+    hal_Interrupt_Disable(void);
+    volatile uint8_t * interruptcontrolregister = 0x5f;
+    return *interruptcontrolregister ;
+
 }
 void hal_Interrupt_Restore(u16 flags){
-
+    volatile uint8_t * interruptcontrolregister = 0x5f;
+    *interruptcontrolregister = flags;
 }
 
