@@ -59,6 +59,7 @@ public class SerialComPort {
         0x38, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x31, 0x30, 0x0A, 0x00, 0 };
     
     static byte[] runPacket = { 0x03, 0x22, (byte)Cmd.Run, 0 };
+    static byte[] resetPacket = { 0x03, (byte)Cmd.Reset, (byte)Cmd.Reset, 0 };
 
     static bool       _continue;
     static bool       _run;
@@ -205,6 +206,8 @@ public class SerialComPort {
                 _serialPort.Write(getStatusPacket, 0, 4);
             } else if (stringComparer.Equals("d", cmd)) { // download (sendData - small pgm)
                 transmitCode(buf);
+            }else if (stringComparer.Equals("reset", cmd)) { // reset packet
+                _serialPort.Write(resetPacket, 0, 4);
             } else if (stringComparer.Equals("run", cmd)) { // run
                 _serialPort.Write(runPacket, 0, 4);
                 _run = true;
